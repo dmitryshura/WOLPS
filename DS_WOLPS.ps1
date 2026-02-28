@@ -11,8 +11,10 @@ $defaultPort = 9
 # --- Create Form ---
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Wake-on-LAN Sender"
-$form.Size = New-Object System.Drawing.Size(400, 220)
+$form.Size = New-Object System.Drawing.Size(400, 260)  # Increased height
 $form.StartPosition = "CenterScreen"
+$form.FormBorderStyle = 'FixedDialog'
+$form.MaximizeBox = $false
 
 # --- MAC Address Label & TextBox ---
 $lblMac = New-Object System.Windows.Forms.Label
@@ -61,16 +63,17 @@ $form.Controls.Add($lblStatus)
 # --- Send Button ---
 $btnSend = New-Object System.Windows.Forms.Button
 $btnSend.Text = "Send Magic Packet"
-$btnSend.Location = New-Object System.Drawing.Point(120, 170)
-$btnSend.Size = New-Object System.Drawing.Size(150, 30)
+$btnSend.Location = New-Object System.Drawing.Point(120, 180)  # Lowered position
+$btnSend.Size = New-Object System.Drawing.Size(150, 35)        # Bigger button
 $form.Controls.Add($btnSend)
 
-# --- Send Button Click Event ---
-$btnSend.Add_Click({
-    $macAddress = $txtMac.Text.Trim()
-    $broadcastAddress = $txtBroadcast.Text.Trim()
-    $port = $txtPort.Text.Trim()
-
+# --- Function to send WOL packet ---
+function Send-WOL {
+    param (
+        [string]$macAddress,
+        [string]$broadcastAddress,
+        [string]$port
+    )
     try {
         # Validate MAC
         if ($macAddress -notmatch '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$') {
@@ -101,7 +104,21 @@ $btnSend.Add_Click({
         $lblStatus.ForeColor = 'Red'
         $lblStatus.Text = "❌ Error: $_"
     }
+}
+
+# --- Button Click Event ---
+$btnSend.Add_Click({
+    Send-WOL -macAddress $txtMac.Text.Trim() -broadcastAddress $txtBroadcast.Text.Trim() -port $txtPort.Text.Trim()
 })
+
+# --- ENTER key in any field triggers send ---
+foreach ($textbox in @($txtMac, $txtBroadcast, $txtPort)) {
+    $textbox.Add_KeyDown({
+        if ($_.KeyCode -eq 'Enter') {
+            Send-WOL -macAddress $txtMac.Text.Trim() -broadcastAddress $txtBroadcast.Text.Trim() -port $txtPort.Text.Trim()
+        }
+    })
+}
 
 # --- Show Form ---
 [void]$form.ShowDialog()
