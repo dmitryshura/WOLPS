@@ -26,7 +26,13 @@ No third-party modules required — uses only built-in **.NET** and **Windows Fo
    - In **BIOS/UEFI** settings.
    - In **Windows Device Manager** → Network Adapter → Power Management → Enable WOL.
 2. **Download** the `DS_WOLPS.ps1` script.
-3. **Run PowerShell as Administrator**.
+3. **Run PowerShell / ISE as Administrator**.
 4. Allow script execution for the session:
    ```powershell
    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   ```
+   or
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\DS_WOLPS.ps1
+   
